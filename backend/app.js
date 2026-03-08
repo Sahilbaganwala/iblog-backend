@@ -24,9 +24,14 @@ connectDB();
 // =========================
 
 // CORS must be first
+// =========================
+// MIDDLEWARE ORDER (IMPORTANT)
+// =========================
+
+// CORS must be first
 app.use(cors({
-  origin: 'https://iblog-frontend.onrender.com', // specific origin
-  credentials: true                // allow session cookie from browser to pass through
+  origin: ['http://localhost:5173', 'https://iblog-frontend.onrender.com'], // Array allows both!
+  credentials: true                
 }));
 app.use("/images", express.static("public/images"));
 

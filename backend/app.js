@@ -25,9 +25,10 @@ connectDB();
 
 // CORS must be first
 app.use(cors({
-  origin: 'http://localhost:5173', // specific origin
+  origin: 'https://iblog-frontend.onrender.com', // specific origin
   credentials: true                // allow session cookie from browser to pass through
-}));app.use("/images", express.static("public/images"));
+}));
+app.use("/images", express.static("public/images"));
 
 // Logger
 app.use(logger("dev"));
@@ -70,8 +71,8 @@ app.use((req, res) => {
 
 const PORT = process.env.PORT || 4000;
 
-app.listen(4000, () => {
-  console.log(`Server running at http://localhost:4000`);
+app.listen(PORT, () => {
+  console.log(`Server running at http://localhost:${PORT}`);
 });
 
 module.exports = app;

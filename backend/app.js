@@ -14,21 +14,9 @@ const adminRoutes = require("./routes/admin");
 
 const app = express();
 
-// =========================
-// DATABASE
-// =========================
 connectDB();
 
-// =========================
-// MIDDLEWARE ORDER (IMPORTANT)
-// =========================
 
-// CORS must be first
-// =========================
-// MIDDLEWARE ORDER (IMPORTANT)
-// =========================
-
-// CORS must be first
 app.use(cors({
   origin: ['http://localhost:5173', 'https://iblog-frontend.onrender.com'], // Array allows both!
   credentials: true                
@@ -43,10 +31,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // File Upload (MUST come after body parser)
+// File Upload (MUST come after body parser)
 app.use(fileUpload({
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
-  useTempFiles: false,
-  createParentPath: true,
+  useTempFiles: true,
+  tempFileDir: '/tmp/'
 }));
 
 // Cookies

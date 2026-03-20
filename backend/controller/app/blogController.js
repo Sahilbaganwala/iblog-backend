@@ -1,13 +1,20 @@
 const Blog = require("../../models/Blog");
 const Category = require("../../models/Category");
 const path = require("path");
+const cloudinary = require('cloudinary').v2;
+
+cloudinary.config({ 
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME, 
+  api_key: process.env.CLOUDINARY_API_KEY, 
+  api_secret: process.env.CLOUDINARY_API_SECRET 
+});
 
 module.exports = {
   // ================================
   // CREATE BLOG
   // ================================
 
-  createBlog: async (req, res) => {
+createBlog: async (req, res) => {
     try {
       const { title, category_id, short_description, content } = req.body;
 
@@ -17,41 +24,48 @@ module.exports = {
         });
       }
 
-      let imagePath = null;
+      let imageUrl = null; // Changed name to reflect it's a URL now
 
+      // ✅ UPLOAD TO CLOUDINARY
       if (req.files && req.files.thumbnail) {
         const image = req.files.thumbnail;
 
-        const uploadDir = path.join(__dirname, "../../public/images");
+        try {
+          // Upload the temporary file to Cloudinary
+          const result = await cloudinary.uploader.upload(image.tempFilePath, {
+            folder: "iblog", // Creates a neat folder in your Cloudinary account
+          });
+          
+          // Get the permanent, secure URL back from Cloudinary
+          imageUrl = result.secure_url; 
 
-        const fileName = Date.now() + "_" + image.name;
-
-        const uploadPath = path.join(uploadDir, fileName);
-
-        await image.mv(uploadPath);
-
-        imagePath = `/images/${fileName}`;
+        } catch (uploadError) {
+          console.error("Cloudinary Upload Error:", uploadError);
+          return res.status(500).json({
+            success: false,
+            message: "Failed to upload image to Cloudinary",
+          });
+        }
       }
 
-      // ✅ SAVE TO DATABASE
       // ✅ SAVE TO DATABASE
       const blog = await Blog.create({
         title,
         description: short_description,
-        image: imagePath,
-
-        category: category_id, // ✅ CORRECT: Map the ID to the 'category' field
-
+        content, // Fix: Added this so your blog content actually saves!
+        image: imageUrl, // Save the Cloudinary URL here instead of local path
+        category: category_id, 
         author: req.user.id,
         user_id: req.user.id,
-
         status: "published",
       });
+
       return res.status(201).json({
         success: true,
         message: "Blog created successfully",
         blog,
       });
+
     } catch (error) {
       console.error("BLOG CREATE ERROR:", error);
 
@@ -61,6 +75,9 @@ module.exports = {
       });
     }
   },
+  
+  // ... rest of your controller functions
+
 
   // ================================
   // UPDATE BLOG
